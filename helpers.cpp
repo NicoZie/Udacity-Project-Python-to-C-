@@ -35,8 +35,22 @@ using namespace std;
 vector< vector<float> > normalize(vector< vector <float> > grid) {
 	
 	vector< vector<float> > newGrid;
+	float total(0.0);
+	vector<float> row;
 
-	// todo - your code here
+	for (int i = 0; i < grid.size(); ++i){
+		for (int j = 0; j < grid[0].size(); ++j){
+			total += grid[i][j];
+		}
+	}
+	for (int i = 0; i < grid.size(); ++i) {
+		row = {};
+		for (int j = 0; j < grid[0].size(); ++j) {
+			row.push_back(grid[i][j] / total);
+		}
+		newGrid.push_back(row);
+	}
+	// OK - todo - your code here
 
 	return newGrid;
 }
@@ -77,6 +91,40 @@ vector< vector<float> > normalize(vector< vector <float> > grid) {
 vector < vector <float> > blur(vector < vector < float> > grid, float blurring) {
 
 	vector < vector <float> > newGrid;
+	int height = grid.size();
+	int width = grid[0].size();
+	vector<float> row;
+	for (int i = 0; i < height; ++i) {
+		row = {};
+		for (int j = 0; j < width; ++j) {
+			row.push_back(0.0);
+		}
+		newGrid.push_back(row);
+	}
+
+	float center_prob = 1.0 - blurring;
+	float corner_prob = blurring / 12.0;
+	float adjacent_prob = blurring / 6.0;
+
+	vector < vector <float> > window = {
+		    {corner_prob,  adjacent_prob,  corner_prob},
+            {adjacent_prob, center_prob,  adjacent_prob},
+            {corner_prob,  adjacent_prob,  corner_prob}
+	};
+	
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			float grid_val = grid[i][j];
+			for (int dx = -1; dx < 2; ++dx){
+				for (int dy = -1; dy < 2; ++dy){
+					float mult = window[dx+1][dy+1];
+					int new_i = (height + ((i + dy) % height)) % height;
+					int new_j = (width + ((j + dx) % width)) % width;
+					newGrid[new_i][new_j] += mult * grid_val; 
+				}
+			}
+		} 
+	}
 	
 	// your code here
 
@@ -215,9 +263,13 @@ vector < vector <float> > zeros(int height, int width) {
 	}
 	return newGrid;
 }
-
-// int main() {
-// 	vector < vector < char > > map = read_map("maps/m1.txt");
-// 	show_grid(map);
-// 	return 0;
-// }
+//int main() {
+//	return 0;
+//}
+/*
+int main() {
+vector < vector < char > > map = read_map("maps/m1.txt");
+show_grid(map);
+return 0;
+}
+*/
